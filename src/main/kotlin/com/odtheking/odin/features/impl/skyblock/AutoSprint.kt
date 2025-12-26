@@ -22,7 +22,7 @@ object AutoSprint : Module(
 
         on<ChatPacketEvent> {
             if (!filter) return@on
-            if (value.startsWith("[BOSS]") && !bossMessages.contains(msg)) hideMessage()
+            if (value.startsWith("[BOSS]") && !bossMessages.contains(value)) hideMessage()
             else if (v.any { it.matches(value) }) hideMessage()
         }
     }
