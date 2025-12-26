@@ -65,9 +65,7 @@ object ChatCommands : Module(
             if (value.matches(endRunRegex)) {
                 if (!dt || dtReason.isEmpty()) return@on
                 schedule(30) {
-                    dtReason.find { it.first == mc.player?.name?.string }?.let { sendCommand("pc Downtime needed: ${it.second}") }
                     modMessage("DT Reasons: ${dtReason.groupBy({ it.second }, { it.first }).entries.joinToString(", ") { (reason, names) -> "${names.joinToString(", ")}: $reason" }}")
-                    alert("§cPlayers need DT")
                     dtReason.clear()
                 }
             }

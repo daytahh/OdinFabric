@@ -79,7 +79,7 @@ object InvincibilityTimer : Module(
         on<ChatPacketEvent> {
             if (!DungeonUtils.inDungeons) return@on
             InvincibilityType.entries.firstOrNull { type -> value.matches(type.regex) }?.let { type ->
-                if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase().capitalizeFirst()} Procced!")
+                if (invincibilityAnnounce) sendCommand("pc ${type.name.lowercase()} procced")
                 if (invincibilityAlert) alert(type.name.lowercase().capitalizeFirst())
                 type.proc()
             }
