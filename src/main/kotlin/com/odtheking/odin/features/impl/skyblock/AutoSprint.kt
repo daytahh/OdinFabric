@@ -13,7 +13,7 @@ object AutoSprint : Module(
     name = "Auto Sprint",
     description = "Automatically makes you sprint."
 ) {
-    private val filter by BooleanSetting("filter" false, desc = "")
+    private val filter by BooleanSetting("filter", false, desc = "")
 
     init {
         on<TickEvent.End> {
@@ -27,7 +27,7 @@ object AutoSprint : Module(
         }
     }
 
-    val v = listOf(    
+    val v = listOf(
         Regex("RIGHT CLICK on (?:a WITHER door|the BLOOD DOOR) to open it. This key can only be used to open 1 door!"),
         Regex("\\[SKULL] Wither Skull: .+"),
 //        Regex("\\[BOSS] .+"),
