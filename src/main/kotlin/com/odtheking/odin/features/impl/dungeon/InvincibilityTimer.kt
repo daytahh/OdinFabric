@@ -67,6 +67,10 @@ object InvincibilityTimer : Module(
     }
     private val showOnlyInBoss by BooleanSetting("Show In Boss", false, desc = "Only shows invincibility timers during dungeon boss fights.")
 
+    private val phoenixautopet = Regex("^Autopet equipped your \\[Lvl \\d+](?: \\[\\d+✦])? ([^✦!]+)(?: ✦)?! VIEW RULE$")
+    private val phoenixequip = Regex("^You summoned your ([^✦!]+)( ✦)?!$")
+    private var hasphoenix = false
+
     init {
         on<TickEvent.Server> {
             InvincibilityType.entries.forEach { it.tick() }
@@ -79,6 +83,8 @@ object InvincibilityTimer : Module(
                 if (invincibilityAlert) alert(type.name.lowercase().capitalizeFirst())
                 type.proc()
             }
+            phoenixautopet.find(value)?.let { hasphoenix = it.groupValues[1] == "Phoenix" }
+            phoenixequip.find(value)?.let { hasphoenix = it.groupValues[1] == "Phoenix" }
         }
 
         on<WorldEvent.Load> {
