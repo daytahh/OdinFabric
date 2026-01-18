@@ -49,7 +49,7 @@ object InvincibilityTimer : Module(
 
         val head = mc.player?.getItemBySlot(EquipmentSlot.HEAD)?.itemId
         visibleTypes.forEachIndexed { index, type ->
-            val y = index * 9f
+            val y = index * 9
 
             val color = if (type == InvincibilityType.BONZO && head?.equalsOneOf("BONZO_MASK", "STARRED_BONZO_MASK") == true ||
                 type == InvincibilityType.SPIRIT && head?.equalsOneOf("SPIRIT_MASK", "STARRED_SPIRIT_MASK") == true ||

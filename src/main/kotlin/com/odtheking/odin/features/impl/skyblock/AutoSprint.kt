@@ -7,7 +7,7 @@ import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.ChatManager.hideMessage
 
 object AutoSprint : Module(name = "Auto Sprint", description = "Automatically makes you sprint.") {
-    private val bosswarp by BooleanSetting("filter", false, desc = "")
+    private val filter by BooleanSetting("filter", false, desc = "")
 
     private val v = listOf(
         Regex("RIGHT CLICK on (?:a WITHER door|the BLOOD DOOR) to open it. This key can only be used to open 1 door!"),
