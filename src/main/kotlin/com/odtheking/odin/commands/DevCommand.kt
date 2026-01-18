@@ -26,7 +26,6 @@ import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils
 import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomCenter
-import com.odtheking.odin.utils.skyblock.dungeon.ScanUtils.getRoomData
 import com.odtheking.odin.utils.ui.rendering.NVGRenderer
 import kotlinx.coroutines.launch
 import net.minecraft.core.registries.BuiltInRegistries
@@ -183,17 +182,19 @@ val devCommand = Commodore("oddev") {
 
     literal("roomdata").runs {
         val player = mc.player ?: return@runs
-        val room = ScanUtils.scanRoom(getRoomCenter(player.x.toInt(), player.z.toInt()))
-        val roomCenter = getRoomCenter(player.x.toInt(), player.z.toInt())
+        val vec2 = Vec2(player.x.toInt(), player.z.toInt())
+        val chunk = mc.level?.getChunk(vec2.x shr 4, vec2.z shr 4) ?: return@runs
+        val roomCenter = getRoomCenter(vec2.x, vec2.z)
+        val room = ScanUtils.scanRoom(roomCenter)
         val core = ScanUtils.getCore(roomCenter)
         modMessage(
             """
             Middle: ${roomCenter.x}, ${roomCenter.z}
-            Room: ${getRoomData(core)?.name}
+            Room: ${ScanUtils.coreToRoomData[core]?.name}
             Core: $core
             Rotation: ${room?.rotation ?: "NONE"}
             Positions: ${room?.roomComponents?.joinToString { "(${it.x}, ${it.z})" } ?: "None"}
-            Height: ${ScanUtils.getTopLayerOfRoom(roomCenter)}
+            Height: ${ScanUtils.getTopLayerOfRoom(vec2, chunk)}
             """.trimIndent(), "")
         setClipboardContent(core.toString())
         modMessage("§aCopied $core to clipboard!")

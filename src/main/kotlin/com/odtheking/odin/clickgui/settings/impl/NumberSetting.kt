@@ -1,5 +1,6 @@
 package com.odtheking.odin.clickgui.settings.impl
 
+import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.odtheking.odin.clickgui.ClickGUI.gray38
@@ -86,7 +87,7 @@ class NumberSetting<E>(
         super.render(x, y, mouseX, mouseY)
         val height = getHeight()
 
-        handler.handle(x, y + height / 2, width, height / 2)
+        handler.handle(x, y + height / 2, width, height / 2, true)
 
         if (listening) {
             val newPercentage = ((mouseX - (x + 6f)) / (width - 12f)).coerceIn(0f, 1f)
@@ -148,13 +149,13 @@ class NumberSetting<E>(
 
     override val isHovered: Boolean
         get() =
-            isAreaHovered(lastX, lastY + getHeight() / 2, width, getHeight() / 2)
+            isAreaHovered(lastX, lastY + getHeight() / 2, width, getHeight() / 2, true)
 
     override fun getHeight(): Float = Panel.HEIGHT + 8f
 
-    override fun write(): JsonElement = JsonPrimitive(value)
+    override fun write(gson: Gson): JsonElement = JsonPrimitive(value)
 
-    override fun read(element: JsonElement) {
+    override fun read(element: JsonElement, gson: Gson) {
         element.asNumber?.let { value = it as E }
     }
 

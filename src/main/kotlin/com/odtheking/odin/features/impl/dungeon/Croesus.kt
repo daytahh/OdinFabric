@@ -16,11 +16,13 @@ import com.odtheking.odin.utils.network.WebUtils.fetchJson
 import com.odtheking.odin.utils.render.getStringWidth
 import com.odtheking.odin.utils.render.text
 import com.odtheking.odin.utils.render.textDim
+import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.world.item.ItemStack
@@ -55,7 +57,7 @@ object Croesus : Module(
         }
     }
 
-    private var cachedPrices = emptyMap<String, Double>()
+    var cachedPrices = emptyMap<String, Double>()
     private var currentChestCount = 0
 
     private val chestNameRegex = Regex("^(Wood|Iron|Gold|Diamond|Emerald|Obsidian|Bedrock) Chest$")
@@ -123,12 +125,13 @@ object Croesus : Module(
             }
         }
 
-        onReceive<ClientboundContainerSetContentPacket> {
+        onReceive<ClientboundContainerSetSlotPacket> {
             val screenTitle = mc.screen?.title?.string ?: return@onReceive
+            val menu = (mc.screen as? AbstractContainerScreen<*>)?.menu ?: return@onReceive
 
             when {
-                screenTitle.matches(chestNameRegex) -> handleChestContents(items)
-                screenTitle.matches(chestPreviewScreenRegex) -> handleCroesusScreen(items)
+                screenTitle.matches(chestNameRegex) -> handleChestContents(menu.items)
+                screenTitle.matches(chestPreviewScreenRegex) -> handleCroesusScreen(menu.items)
             }
         }
 

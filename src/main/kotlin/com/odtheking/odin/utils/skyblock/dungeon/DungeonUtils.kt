@@ -21,16 +21,16 @@ import kotlin.math.roundToLong
 object DungeonUtils {
 
     inline val inDungeons: Boolean
-        get() = LocationUtils.currentArea.isArea(Island.Dungeon)
+        get() = LocationUtils.isCurrentArea(Island.Dungeon)
 
     inline val inClear: Boolean
         get() = inDungeons && !inBoss
 
-    inline val floor: Floor?
-        get() = DungeonListener.floor
-
     inline val inBoss: Boolean
         get() = DungeonListener.inBoss
+
+    inline val floor: Floor?
+        get() = DungeonListener.floor
 
     inline val secretCount: Int
         get() = DungeonListener.dungeonStats.secretsFound
@@ -162,7 +162,7 @@ object DungeonUtils {
      * @return The current phase of floor 7 boss, or `null` if the player is not in the boss room.
      */
     fun getF7Phase(): M7Phases {
-        if ((!isFloor(7) || !inBoss) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return M7Phases.Unknown
+        if ((!isFloor(7) || !inBoss) && !LocationUtils.isCurrentArea(Island.SinglePlayer)) return M7Phases.Unknown
 
         with(mc.player ?: return M7Phases.Unknown) {
             return when {
@@ -197,13 +197,16 @@ object DungeonUtils {
             val (_, name, clazz, clazzLevel) = tablistRegex.find(line)?.destructured ?: continue
 
             previousTeammates.find { it.name == name }?.let { player -> player.isDead = clazz == "DEAD" }
-                ?: previousTeammates.add(
-                    DungeonPlayer(
-                        name, DungeonClass.entries.find { it.name == clazz } ?: continue,
-                        romanToInt(clazzLevel), mc.connection?.getPlayerInfo(name)?.skin?.body?.id()
-
+                ?: run {
+                    val player = mc.connection?.getPlayerInfo(name) ?: continue
+                    previousTeammates.add(
+                        DungeonPlayer(
+                            name, DungeonClass.entries.find { it.name == clazz } ?: continue,
+                            romanToInt(clazzLevel), player.skin?.body?.id(),
+                            entity = mc.level?.getPlayerByUUID(player.profile?.id)
+                        )
                     )
-                )
+                }
         }
         return previousTeammates
     }

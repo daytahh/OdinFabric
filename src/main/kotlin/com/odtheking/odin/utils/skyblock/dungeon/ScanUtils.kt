@@ -1,80 +1,63 @@
 package com.odtheking.odin.utils.skyblock.dungeon
 
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import com.odtheking.odin.OdinMod.logger
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RoomEnterEvent
 import com.odtheking.odin.events.TickEvent
 import com.odtheking.odin.events.WorldEvent
 import com.odtheking.odin.events.core.on
+import com.odtheking.odin.utils.JsonResourceLoader
 import com.odtheking.odin.utils.Vec2
 import com.odtheking.odin.utils.devMessage
 import com.odtheking.odin.utils.equalsOneOf
 import com.odtheking.odin.utils.skyblock.Island
 import com.odtheking.odin.utils.skyblock.LocationUtils
-import com.odtheking.odin.utils.skyblock.dungeon.tiles.*
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.Room
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomComponent
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.RoomData
+import com.odtheking.odin.utils.skyblock.dungeon.tiles.Rotations
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.level.block.Blocks
-import java.io.FileNotFoundException
+import net.minecraft.world.level.chunk.LevelChunk
 
 object ScanUtils {
     private const val ROOM_SIZE_SHIFT = 5  // Since ROOM_SIZE = 32 (2^5) so we can perform bitwise operations
     private const val START = -185
 
-    private var lastRoomPos: Vec2 = Vec2(0, 0)
-    private val roomList: Set<RoomData> = loadRoomData()
-    private val coreToRoomData: Map<Int, RoomData> =
+    val roomList: Set<RoomData> = JsonResourceLoader.loadJson("/assets/odin/rooms.json", setOf())
+    val coreToRoomData: Map<Int, RoomData> =
         roomList.flatMap { room -> room.cores.map { core -> core to room } }.toMap()
+
+    private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
+    private val mutableBlockPos = BlockPos.MutableBlockPos()
+    private var lastRoomPos: Vec2 = Vec2(0, 0)
+
     var currentRoom: Room? = null
         private set
     var passedRooms: MutableSet<Room> = mutableSetOf()
         private set
 
-    private val mutableBlockPos = BlockPos.MutableBlockPos()
-
-    private fun loadRoomData(): Set<RoomData> {
-        return try {
-            GsonBuilder()
-                .registerTypeAdapter(
-                    RoomData::class.java,
-                    RoomDataDeserializer()
-                )
-                .create().fromJson(
-                    (ScanUtils::class.java.getResourceAsStream("/assets/odin/rooms.json")
-                        ?: throw FileNotFoundException()).bufferedReader(),
-                    object : TypeToken<Set<RoomData>>() {}.type
-                )
-        } catch (e: Exception) {
-            logger.error("Error reading room data", e)
-            println(e.message)
-            setOf()
-        }
-    }
-
-    private val horizontals = Direction.entries.filter { it.axis.isHorizontal }
-
     init {
         on<TickEvent.End> {
             if (mc.level == null || mc.player == null) return@on
 
-            if ((!DungeonUtils.inDungeons && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) || DungeonUtils.inBoss) {
+            if ((!DungeonUtils.inDungeons && !LocationUtils.isCurrentArea(Island.SinglePlayer)) || DungeonUtils.inBoss) {
                 currentRoom?.let { RoomEnterEvent(null).postAndCatch() }
                 return@on
             } // We want the current room to register as null if we are not in a dungeon
 
             val roomCenter = getRoomCenter(mc.player?.x?.toInt() ?: return@on, mc.player?.z?.toInt() ?: return@on)
-            if (roomCenter == lastRoomPos && LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on // extra SinglePlayer caching for invalid placed rooms
+            if (roomCenter == lastRoomPos && LocationUtils.isCurrentArea(Island.SinglePlayer)) return@on // extra SinglePlayer caching for invalid placed rooms
             lastRoomPos = roomCenter
 
             passedRooms.find { previousRoom -> previousRoom.roomComponents.any { it.vec2 == roomCenter } }?.let { room ->
                 if (currentRoom?.roomComponents?.none { it.vec2 == roomCenter } == true) RoomEnterEvent(room).postAndCatch()
                 return@on
-            } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it we don't want to trigger the event
+            } // We want to use cached rooms instead of scanning it again if we have already passed through it and if we are already in it, we don't want to trigger the event
 
             scanRoom(roomCenter)?.let { room -> if (room.rotation != Rotations.NONE) RoomEnterEvent(room).postAndCatch() } ?: run {
-                if ((!DungeonUtils.inClear) && !LocationUtils.currentArea.isArea(Island.SinglePlayer)) return@on
+                if ((!DungeonUtils.inClear) && !LocationUtils.isCurrentArea(Island.SinglePlayer)) return@on
                 devMessage("Unable to determine room at $roomCenter core: ${getCore(roomCenter)}")
             }
         }
@@ -92,18 +75,19 @@ object ScanUtils {
         }
     }
 
-    private fun updateRotation(room: Room, roomHeight: Int) {
-        room.roomHeight = roomHeight
+    fun updateRotation(room: Room, roomHeight: Int) {
         if (room.data.name == "Fairy") { // Fairy room doesn't have a clay block so we need to set it manually
             room.clayPos = room.roomComponents.firstOrNull()?.let { BlockPos(it.x - 15, roomHeight, it.z - 15) } ?: return
             room.rotation = Rotations.SOUTH
             return
         }
+
+        val level = mc.level ?: return
         room.rotation = Rotations.entries.dropLast(1).find { rotation ->
             room.roomComponents.any { component ->
                 BlockPos(component.x + rotation.x, roomHeight, component.z + rotation.z).let { blockPos ->
-                    mc.level?.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
-                        mc.level?.getBlockState(
+                    level.getBlockState(blockPos)?.block == Blocks.BLUE_TERRACOTTA && (room.roomComponents.size == 1 || horizontals.all { facing ->
+                        level.getBlockState(
                             blockPos.offset((if (facing.axis == Direction.Axis.X) facing.stepX else 0), 0, (if (facing.axis == Direction.Axis.Z) facing.stepZ else 0))
                         )?.block?.equalsOneOf(Blocks.AIR, Blocks.BLUE_TERRACOTTA) == true
                     }).also { isCorrectClay -> if (isCorrectClay) room.clayPos = blockPos }
@@ -113,18 +97,21 @@ object ScanUtils {
     }
 
     fun scanRoom(vec2: Vec2): Room? {
-        val roomHeight = getTopLayerOfRoom(vec2)
-        return getCore(vec2, roomHeight).let { core ->
-            getRoomData(core)?.let { roomData ->
-                Room(data = roomData, roomComponents = findRoomComponentsRecursively(vec2, roomData.cores, roomHeight))
+        val level = mc.level ?: return null
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        val roomHeight = getTopLayerOfRoom(vec2, chunk)
+        return getCoreAtHeight(vec2, roomHeight, chunk).let { core ->
+            coreToRoomData[core]?.let { roomData ->
+                Room(data = roomData, roomComponents = findRoomComponentsRecursively(vec2, roomData.cores, roomHeight, level))
             }?.apply { updateRotation(this, roomHeight) }
         }
     }
 
-    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, roomHeight: Int, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
+    private fun findRoomComponentsRecursively(vec2: Vec2, cores: List<Int>, roomHeight: Int, level: ClientLevel, visited: MutableSet<Vec2> = mutableSetOf(), tiles: MutableSet<RoomComponent> = mutableSetOf()): MutableSet<RoomComponent> {
         if (vec2 in visited) return tiles else visited.add(vec2)
 
-        val core = getCore(vec2, roomHeight)
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        val core = getCoreAtHeight(vec2, roomHeight, chunk)
         if (core !in cores) return tiles
 
         tiles.add(RoomComponent(vec2.x, vec2.z, core))
@@ -133,13 +120,11 @@ object ScanUtils {
                 Vec2(
                     vec2.x + ((if (facing.axis == Direction.Axis.X) facing.stepX else 0) shl ROOM_SIZE_SHIFT),
                     vec2.z + ((if (facing.axis == Direction.Axis.Z) facing.stepZ else 0) shl ROOM_SIZE_SHIFT)
-                ), cores, roomHeight, visited, tiles
+                ), cores, roomHeight, level, visited, tiles
             )
         }
         return tiles
     }
-
-    fun getRoomData(hash: Int): RoomData? = coreToRoomData[hash]
 
     fun getRoomCenter(posX: Int, posZ: Int): Vec2 {
         val roomX = (posX - START + (1 shl (ROOM_SIZE_SHIFT - 1))) shr ROOM_SIZE_SHIFT
@@ -147,14 +132,21 @@ object ScanUtils {
         return Vec2(((roomX shl ROOM_SIZE_SHIFT) + START), ((roomZ shl ROOM_SIZE_SHIFT) + START))
     }
 
-    fun getCore(vec2: Vec2, height: Int? = null): Int {
+    fun getCore(vec2: Vec2): Int {
+        val level = mc.level ?: return 0
+        val chunk = level.getChunk(vec2.x shr 4, vec2.z shr 4)
+        return getCoreAtHeight(vec2, getTopLayerOfRoom(vec2, chunk), chunk)
+    }
+
+    private fun getCoreAtHeight(vec2: Vec2, roomHeight: Int, chunk: LevelChunk): Int {
         val sb = StringBuilder(150)
-        val roomHeight = (height ?: getTopLayerOfRoom(vec2)).coerceIn(11..140)
-        sb.append(CharArray(140 - roomHeight) { '0' })
+        val clampedHeight = roomHeight.coerceIn(11..140)
+        sb.append(CharArray(140 - clampedHeight) { '0' })
         var bedrock = 0
-        for (y in roomHeight downTo 12) {
+
+        for (y in clampedHeight downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val block = mc.level?.getBlockState(mutableBlockPos)?.block
+            val block = chunk.getBlockState(mutableBlockPos)?.block
             if (block == Blocks.AIR && bedrock >= 2 && y < 69) {
                 sb.append(CharArray(y - 11) { '0' })
                 break
@@ -170,10 +162,10 @@ object ScanUtils {
         return sb.toString().hashCode()
     }
 
-    fun getTopLayerOfRoom(vec2: Vec2): Int {
+    fun getTopLayerOfRoom(vec2: Vec2, chunk: LevelChunk): Int {
         for (y in 160 downTo 12) {
             mutableBlockPos.set(vec2.x, y, vec2.z)
-            val blockState = mc.level?.getBlockState(mutableBlockPos)
+            val blockState = chunk.getBlockState(mutableBlockPos)
             if (blockState?.isAir == false) return if (blockState.block == Blocks.GOLD_BLOCK) y - 1 else y
         }
         return 0

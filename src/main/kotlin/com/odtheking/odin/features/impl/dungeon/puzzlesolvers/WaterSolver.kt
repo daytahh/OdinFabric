@@ -1,14 +1,13 @@
 package com.odtheking.odin.features.impl.dungeon.puzzlesolvers
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.odtheking.odin.OdinMod.mc
 import com.odtheking.odin.events.RenderEvent
 import com.odtheking.odin.utils.Color
+import com.odtheking.odin.utils.JsonResourceLoader
 import com.odtheking.odin.utils.modMessage
 import com.odtheking.odin.utils.render.drawLine
 import com.odtheking.odin.utils.render.drawText
-import com.odtheking.odin.utils.renderPos
+import com.odtheking.odin.utils.render.drawTracer
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils
 import com.odtheking.odin.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import com.odtheking.odin.utils.toFixed
@@ -16,18 +15,12 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 
 object WaterSolver {
 
-    private var waterSolutions: JsonObject
-
-    init {
-        val isr = WaterSolver::class.java.getResourceAsStream("/assets/odin/puzzles/waterSolutions.json")?.let { InputStreamReader(it, StandardCharsets.UTF_8) } ?: throw IllegalStateException("Water solutions file not found")
-        waterSolutions = JsonParser.parseString(isr.readText()).asJsonObject
-        isr.close()
-    }
+    private var waterSolutions: Map<String, Map<String, Map<String, Map<String, List<Double>>>>> = JsonResourceLoader.loadJson(
+        "/assets/odin/puzzles/waterSolutions.json", emptyMap()
+    )
 
     private var solutions = HashMap<LeverBlock, Array<Double>>()
     private var patternIdentifier = -1
@@ -49,9 +42,9 @@ object WaterSolver {
         modMessage("$patternIdentifier || ${WoolColor.entries.filter { it.isExtended }.joinToString(", ") { it.name.lowercase() }}")
 
         solutions.clear()
-        waterSolutions[optimized.toString()].asJsonObject[patternIdentifier.toString()].asJsonObject[extendedSlots].asJsonObject.entrySet().forEach { entry ->
+        waterSolutions[optimized.toString()]?.get(patternIdentifier.toString())?.get(extendedSlots)?.forEach { (key, times) ->
             solutions[
-                when (entry.key) {
+                when (key) {
                     "diamond_block" -> LeverBlock.DIAMOND
                     "emerald_block" -> LeverBlock.EMERALD
                     "hardened_clay" -> LeverBlock.CLAY
@@ -61,7 +54,7 @@ object WaterSolver {
                     "water"         -> LeverBlock.WATER
                     else -> LeverBlock.NONE
                 }
-            ] = entry.value.asJsonArray.map { it.asDouble }.toTypedArray()
+            ] = times.toTypedArray()
         }
     }
 
@@ -70,16 +63,17 @@ object WaterSolver {
 
         val solutionList = solutions
             .flatMap { (lever, times) -> times.drop(lever.i).map { Pair(lever, it) } }
-            .sortedBy { (lever, time) -> time + if (lever == LeverBlock.WATER) 0.01 else 0.0 }
+            .sortedBy { (lever, time) -> (if (time == 0.0) 0 else 1000) + lever.ordinal }
+
 
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
-            mc.player?.let { event.drawLine(listOf(it.renderPos, Vec3(firstSolution.leverPos).add(.5, .5, .5)), color = tracerColorFirst, depth = true) }
+            mc.player?.let { event.drawTracer(Vec3(firstSolution.leverPos).add(.5, .5, .5), color = tracerColorFirst, depth = false) }
 
             if (solutionList.size > 1 && firstSolution.leverPos != solutionList[1].first.leverPos) {
                 event.drawLine(
                     listOf(Vec3(firstSolution.leverPos).add(.5, .5, .5), Vec3(solutionList[1].first.leverPos).add(.5, .5, .5)),
-                    color = tracerColorSecond, depth = true
+                    color = tracerColorSecond, depth = false
                 )
             }
         }
@@ -132,9 +126,9 @@ object WaterSolver {
     }
 
     private enum class LeverBlock(val relativePosition: BlockPos, var i: Int = 0) {
-        QUARTZ(BlockPos(20, 61, 20)),
-        GOLD(BlockPos(20, 61, 15)),
         COAL(BlockPos(20, 61, 10)),
+        GOLD(BlockPos(20, 61, 15)),
+        QUARTZ(BlockPos(20, 61, 20)),
         DIAMOND(BlockPos(10, 61, 20)),
         EMERALD(BlockPos(10, 61, 15)),
         CLAY(BlockPos(10, 61, 10)),

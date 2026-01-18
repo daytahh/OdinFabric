@@ -189,8 +189,31 @@ fun formatNumber(numStr: String): String {
 fun Module.createSoundSettings(name: String, default: String, dependencies: () -> Boolean): () -> Triple<String, Float, Float> {
     val customSound = +StringSetting(name, default, desc = "Name of a custom sound to play.", length = 64).withDependency { dependencies() }
     val pitch = +NumberSetting("$name Pitch", 1f, 0.1f, 2f, 0.01f, desc = "Pitch of the sound to play.").withDependency { dependencies() }
-    val volume = +NumberSetting("$name Volume", 0.3f, 0.1f, 1f, 0.01f, desc = "Volume of the sound to play.").withDependency { dependencies() }
+    val volume = +NumberSetting("$name Volume", 1f, 0.1f, 1f, 0.01f, desc = "Volume of the sound to play.").withDependency { dependencies() }
     val soundSettings = { Triple(customSound.value, volume.value, pitch.value) }
     +ActionSetting("Play sound", desc = "Plays the selected sound.") { playSoundSettings(soundSettings()) }.withDependency { dependencies() }
     return soundSettings
+}
+
+private val xpTable = arrayOf(
+    50, 75, 110, 160, 230, 330, 470, 670, 950, 1340,
+    1890, 2665, 3760, 5260, 7380, 10300, 14400, 20000,
+    27600, 38000, 52500, 71500, 97000, 132000, 180000,
+    243000, 328000, 445000, 600000, 800000, 1065000,
+    1410000, 1900000, 2500000, 3300000, 4300000, 5600000,
+    7200000, 9200000, 12000000, 15000000, 19000000,
+    24000000, 30000000, 38000000, 48000000, 60000000,
+    75000000, 93000000, 116250000, 200000000
+)
+
+fun calculateDungeonLevel(xp: Double): Double {
+    if (xp <= 0) return 0.0
+
+    var totalXp = 0.0
+    xpTable.forEachIndexed { level, requiredXp ->
+        if (xp < totalXp + requiredXp) return level + (xp - totalXp) / requiredXp
+        totalXp += requiredXp
+    }
+
+    return (xpTable.size + ((xp - totalXp) / 200000000))
 }

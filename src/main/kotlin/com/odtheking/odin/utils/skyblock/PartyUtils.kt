@@ -148,6 +148,7 @@ object PartyUtils {
     }
 
     private fun disband() {
+        PartyEvent.Leave(members).postAndCatch()
         members.clear()
         partyLeader = null
         isInParty = false

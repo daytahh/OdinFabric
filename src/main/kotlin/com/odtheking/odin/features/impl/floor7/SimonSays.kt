@@ -31,8 +31,8 @@ object SimonSays : Module(
     private val maxStartClicks by NumberSetting("Max Start Clicks", 4, 1, 10, 1, desc = "Maximum number of start button clicks allowed during first phase.").withDependency { blockWrongStart }
     private val customClickSounds by BooleanSetting("Custom Click Sounds", false, desc = "Custom Click Sounds for blocked and unblocked clicks.")
     private val soundsDropdown by DropdownSetting("Custom Sounds Dropdown")
-    private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { soundsDropdown && customClickSounds }
-    private val blockedClick = createSoundSettings("Wrong Sound", "entity.blaze.hurt") { soundsDropdown && customClickSounds && blockWrong }
+    private val correctClick = createSoundSettings("Correct Sound", "entity.experience_orb.pickup") { soundsDropdown }
+    private val blockedClick = createSoundSettings("Wrong Sound", "entity.blaze.hurt") { soundsDropdown && blockWrong }
 
     private val startButton = BlockPos(110, 121, 91)
     private val clickInOrder = ArrayList<BlockPos>()

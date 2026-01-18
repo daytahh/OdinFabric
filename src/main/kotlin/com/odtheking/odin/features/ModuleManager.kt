@@ -60,7 +60,7 @@ object ModuleManager {
             // dungeon
             PuzzleSolvers, BlessingDisplay, LeapMenu, SecretClicked, MapInfo, Mimic, DungeonQueue,
             KeyHighlight, BloodCamp, PositionalMessages, TerracottaTimer, BreakerDisplay, LividSolver,
-            InvincibilityTimer, SpiritBear, DungeonWaypoints, ExtraStats, BetterPartyFinder, Croesus, MageBeam,
+            InvincibilityTimer, SpiritBear, DungeonWaypoints, ExtraStats, BetterPartyFinder, Croesus, MageBeam, DungeonMap,
 
             // floor 7
             TerminalSimulator, TerminalSolver, TerminalTimes, TerminalSounds, TickTimers, ArrowAlign,
@@ -75,7 +75,7 @@ object ModuleManager {
             CommandKeybinds, SlotBinds, Splits,
 
             // nether
-            SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo, Misc
+            SupplyHelper, BuildHelper, RemovePerks, NoPre, PearlWaypoints, FreshTools, KuudraInfo, Misc, Vesuvius
         )
 
         // hashmap, but would need to keep track when setting values change
