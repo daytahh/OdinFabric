@@ -37,9 +37,9 @@ import kotlin.math.sign
 
 object Etherwarp : Module(
     name = "Etherwarp",
-    description = "Provides configurable visual feedback for etherwarp."
+    description = "Provides configurable visual feedback for Etherwarp."
 ) {
-    private val render by BooleanSetting("Show Guess", true, desc = "Shows where etherwarp will take you.")
+    private val render by BooleanSetting("Show Guess", true, desc = "Shows where Etherwarp will take you.")
     private val color by ColorSetting("Color", Colors.MINECRAFT_GOLD.withAlpha(.5f), true, desc = "Color of the box.").withDependency { render }
     private val renderFail by BooleanSetting("Show when failed", true, desc = "Shows the box even when the guess failed.").withDependency { render }
     private val failColor by ColorSetting("Fail Color", Colors.MINECRAFT_RED.withAlpha(.5f), true, desc = "Color of the box if guess failed.").withDependency { renderFail }
@@ -238,7 +238,7 @@ object Etherwarp : Module(
         AirBlock::class, TorchBlock::class, FlowerPotBlock::class,
         TallFlowerBlock::class, TallGrassBlock::class, BushBlock::class,
         SeagrassBlock::class, TallSeagrassBlock::class, SugarCaneBlock::class,
-        LiquidBlock::class, VineBlock::class, MushroomBlock::class, GrassBlock::class,
+        LiquidBlock::class, VineBlock::class, MushroomBlock::class, GrowingPlantBlock::class,
         PistonHeadBlock::class, WoolCarpetBlock::class, WebBlock::class,
         DryVegetationBlock::class, SmallDripleafBlock::class, LeverBlock::class,
         NetherWartBlock::class, NetherPortalBlock::class, RedStoneWireBlock::class,
