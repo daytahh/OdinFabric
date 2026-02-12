@@ -7,6 +7,7 @@ import com.odtheking.odin.events.core.on
 import com.odtheking.odin.events.ChatPacketEvent
 import com.odtheking.odin.features.Module
 import com.odtheking.odin.utils.ChatManager.hideMessage
+import com.odtheking.odin.utils.Colors
 import com.odtheking.odin.utils.render.textDim
 import com.odtheking.odin.utils.toFixed
 
@@ -15,8 +16,8 @@ object AutoSprint : Module(name = "Auto Sprint", description = "Automatically ma
     private val stormtimer by BooleanSetting("storm timer", false, desc = "")
     private val stormhud by HUD("storm hud", "", false) {
         if (!stormtimer || (!it && !shouldrender)) return@HUD 0 to 0
-        val color = if (ticks < 620) "§6" else "§a"
-        textDim("${color}${(ticks / 20f).toFixed()}s", 0, 0)
+        val color = if (ticks < 620) Colors.MINECRAFT_GOLD else Colors.MINECRAFT_GREEN
+        textDim("${(ticks / 20f).toFixed()}s", 0, 0, color)
     }
 
     private var shouldrender = false
