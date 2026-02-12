@@ -141,7 +141,7 @@ object MelodyMessage : Module(
 
     private fun update(type: Int, slot: Int): String = gson.toJson(UpdateMessage(mc.user.name, type, slot))
 
-    private val clayProgress = hashMapOf(2 to "Melody 25%", 3 to "Melody 50%", 4 to "Melody 75%")
+    private val clayProgress = hashMapOf(2 to "melody 1/4", 3 to "melody 2/4", 4 to "melody 3/4")
     private val ranges = listOf(1..5, 10..14, 19..23, 28..32, 37..41)
 
     private fun mapToRange(value: Int): Int? {
