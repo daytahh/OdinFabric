@@ -139,7 +139,7 @@ object ExtraStats : Module(
         val scoree = getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}")
 
         val message = Component.literal(getChatBreak())
-            .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRooms))) })
+            .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText))) })
             .append("\n")
             .append(Component.literal(scoree)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
             .append("\n")
