@@ -138,7 +138,11 @@ object ExtraStats : Module(
         val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
         val scoree = getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}")
 
-        val message = Component.literal(getChatBreak())
+        val message = Component.literal(getChatBreak()).withStyle {
+            it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
+        }   .append("\n")
+            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"))
+            .append("\n\n")
             .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText))) })
             .append("\n")
             .append(Component.literal(scoree).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
@@ -177,12 +181,13 @@ object ExtraStats : Module(
                 )
             ).append("\n")
         }
-
+        message.append("\n")
         message.append(Component.literal(getChatBreak()))
 
         modMessage(message, "")
     }
 
+    private fun getChatBreak(): String = mc.gui?.chat?.width?.let { "§a§l" + "▬".repeat(it / mc.font.width("▬")) } ?: ""
     private data class PostDungeonStats(
         var score: Int = 0,
         var scoreLetter: String? = null,
