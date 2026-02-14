@@ -18,7 +18,6 @@ object ExtraStats : Module(
     description = "Shows additional dungeon stats at the end of the run in chat."
 ) {
     private val showBits by BooleanSetting("Show Bits", true, desc = "Show bits earned.")
-    private val showClassEXP by BooleanSetting("Show Class EXP", true, desc = "Show class experience.")
     private val showCombatStats by BooleanSetting("Show Combat Stats", true, desc = "Show damage, enemy kills and healing.")
     private val teamStats by SelectorSetting("Show Team Stats", "Both", arrayListOf("Off", "Personal", "Team", "Both"), desc = "Toggle how show team stats.")
     private val showTeammates by BooleanSetting("Show Teammates", false, desc = "Show teammates.")
@@ -137,20 +136,13 @@ object ExtraStats : Module(
         else "§aDefeated §c${extraStats.bossKilled} §ain §e${DungeonUtils.dungeonTime}${if (extraStats.timePB) " §d§l(NEW RECORD!)" else ""}"
 
         val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
+        val scoree = getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}")
 
         val message = Component.literal(getChatBreak())
-            .append(getCenteredText(defeatedText))
+            .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRooms))) })
             .append("\n")
-            .append(getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}"))
+            .append(Component.literal(scoree)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
             .append("\n")
-
-        val xpText = "${extraStats.xp.firstOrNull() ?: ""}${if (showClassEXP) "  ${extraStats.xp.getOrNull(1) ?: ""}" else ""}"
-        message.append(
-            Component.literal(getCenteredText(xpText)).withStyle {
-                it.withClickEvent(ClickEvent.SuggestCommand(extraStats.xp.joinToString("\n")))
-                    .withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n"))))
-            }
-        ).append("\n")
 
         if (showCombatStats) {
             message.append(
