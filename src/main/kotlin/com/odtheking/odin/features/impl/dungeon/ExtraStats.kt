@@ -138,11 +138,7 @@ object ExtraStats : Module(
 
         val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
 
-        val message = Component.literal(getChatBreak()).withStyle {
-            it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
-        }   .append("\n\n")
-            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"))
-            .append("\n\n")
+        val message = Component.literal(getChatBreak())
             .append(getCenteredText(defeatedText))
             .append("\n")
             .append(getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}"))
@@ -190,13 +186,7 @@ object ExtraStats : Module(
             ).append("\n")
         }
 
-        message.append("\n")
-            .append(
-                Component.literal(getChatBreak()).withStyle {
-                    it.withClickEvent(ClickEvent.SuggestCommand(passedRoomsText))
-                        .withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
-                }
-            )
+        message.append(Component.literal(getChatBreak()))
 
         modMessage(message, "")
     }
