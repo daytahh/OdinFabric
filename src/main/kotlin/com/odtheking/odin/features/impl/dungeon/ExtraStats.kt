@@ -141,7 +141,7 @@ object ExtraStats : Module(
         val message = Component.literal(getChatBreak())
             .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText))) })
             .append("\n")
-            .append(Component.literal(scoree)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
+            .append(Component.literal(scoree).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
             .append("\n")
 
         if (showCombatStats) {
