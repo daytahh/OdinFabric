@@ -141,7 +141,7 @@ object ExtraStats : Module(
         val message = Component.literal(getChatBreak()).withStyle {
             it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
         }   .append("\n")
-            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"))
+            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " - §eFloor ${DungeonUtils.floor?.floorNumber}"))
             .append("\n\n")
             .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText))) })
             .append("\n")
@@ -187,7 +187,6 @@ object ExtraStats : Module(
         modMessage(message, "")
     }
 
-    private fun getChatBreak(): String = mc.gui?.chat?.width?.let { "§a§l" + "▬".repeat(it / mc.font.width("▬")) } ?: ""
     private data class PostDungeonStats(
         var score: Int = 0,
         var scoreLetter: String? = null,
