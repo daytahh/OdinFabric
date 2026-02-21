@@ -144,9 +144,10 @@ object DungeonWaypoints : Module(
             val allPacks = WaypointPackFileUtils.getAllPacks()
             if (allPacks.isEmpty()) WaypointPackFileUtils.createPack("default")
 
+            val availablePacks = allPacks.ifEmpty { WaypointPackFileUtils.getAllPacks() }
             val packNames = activePacks.split(",").filter { it.isNotBlank() }.toMutableList()
             if (packNames.isEmpty()) {
-                val firstPack = WaypointPackFileUtils.getAllPacks().firstOrNull()?.name ?: "default"
+                val firstPack = availablePacks.firstOrNull()?.name ?: "default"
                 activePacks = firstPack
                 activeEditPack = firstPack
                 packNames.add(firstPack)

@@ -28,7 +28,19 @@ object WaypointPackFileUtils {
     private val packType =
         object : TypeToken<MutableMap<String, MutableList<DungeonWaypoint>>>() {}.type
 
-    val packsFolder = File(mc.gameDirectory, "config/odin/waypoint-packs").apply { mkdirs() }
+    private val configFile = File(mc.gameDirectory, "config/odin/dungeon-waypoint-config.json")
+    val packsFolder = File(mc.gameDirectory, "config/odin/dungeon-waypoints").apply { mkdirs() }
+
+    init {
+        copyLegacyConfigIfExists()
+    }
+
+    private fun copyLegacyConfigIfExists() {
+        if (!configFile.exists()) return
+        val target = File(packsFolder, configFile.name)
+        if (target.exists()) return
+        runCatching { configFile.copyTo(target) }.onFailure { it.printStackTrace() }
+    }
 
     private fun packFile(name: String) = File(packsFolder, "$name.json")
     private fun emptyPack() = mutableMapOf<String, MutableList<DungeonWaypoint>>()
@@ -166,4 +178,3 @@ object WaypointPackFileUtils {
     private fun isValidPackName(name: String) =
         name.isNotEmpty() && name.all { it.isLetterOrDigit() || it == '-' || it == '_' }
 }
-
