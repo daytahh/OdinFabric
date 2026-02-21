@@ -57,7 +57,10 @@ object ClickGUIModule : Module(
 
     fun resetPositions() {
         Category.categories.entries.forEachIndexed { index, (categoryName, _) ->
-            panelSetting[categoryName] = PanelData(10f + 260f * index, 10f, true)
+            val setting = panelSetting.getOrPut(categoryName) { PanelData() }
+            setting.x = 10f + 260f * index
+            setting.y = 10f
+            setting.extended = true
         }
     }
 
