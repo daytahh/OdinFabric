@@ -137,24 +137,17 @@ object ExtraStats : Module(
         else "§aDefeated §c${extraStats.bossKilled} §ain §e${DungeonUtils.dungeonTime}${if (extraStats.timePB) " §d§l(NEW RECORD!)" else ""}"
 
         val passedRoomsText = "Passed rooms: \n${DungeonUtils.passedRooms.joinToString("\n") { room -> "§a${room.data.name}" }}"
+        val scoree = getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}")
 
         val message = Component.literal(getChatBreak()).withStyle {
             it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
-        }   .append("\n\n")
-            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " §r- §e${DungeonUtils.floor?.name}"))
+        }   .append("\n")
+            .append(getCenteredText((if (DungeonUtils.floor?.isMM == true) "§cMaster Mode" else "§cThe Catacombs") + " - §eFloor ${DungeonUtils.floor?.floorNumber}"))
             .append("\n\n")
-            .append(getCenteredText(defeatedText))
+            .append(Component.literal(getCenteredText(defeatedText)).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText))) })
             .append("\n")
-            .append(getCenteredText("§aScore: §6${extraStats.score} §a(§b${extraStats.scoreLetter}§a)${if (extraStats.scorePB) " §d§l(NEW RECORD!)" else ""}${if (extraStats.bits != null && showBits) "    §b${extraStats.bits}" else ""}"))
+            .append(Component.literal(scoree).withStyle { it.withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n")))) })
             .append("\n")
-
-        val xpText = "${extraStats.xp.firstOrNull() ?: ""}${if (showClassEXP) "  ${extraStats.xp.getOrNull(1) ?: ""}" else ""}"
-        message.append(
-            Component.literal(getCenteredText(xpText)).withStyle {
-                it.withClickEvent(ClickEvent.SuggestCommand(extraStats.xp.joinToString("\n")))
-                    .withHoverEvent(HoverEvent.ShowText(Component.literal(extraStats.xp.joinToString("\n"))))
-            }
-        ).append("\n")
 
         if (showCombatStats) {
             message.append(
@@ -191,12 +184,7 @@ object ExtraStats : Module(
         }
 
         message.append("\n")
-            .append(
-                Component.literal(getChatBreak()).withStyle {
-                    it.withClickEvent(ClickEvent.SuggestCommand(passedRoomsText))
-                        .withHoverEvent(HoverEvent.ShowText(Component.literal(passedRoomsText)))
-                }
-            )
+        message.append(Component.literal(getChatBreak()))
 
         modMessage(message, "")
     }

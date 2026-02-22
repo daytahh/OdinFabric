@@ -29,9 +29,9 @@ object SplitsManager {
 
                         with(dungeonSplits[floor.floorNumber].toMutableList()) {
                             addAll(0, listOf(
-                                Split(MORT_REGEX, "§2Blood Open"),
-                                Split(BLOOD_OPEN_REGEX, "§bBlood Clear"),
-                                Split(Regex("\\[BOSS] The Watcher: You have proven yourself\\. You may pass\\."), "§dPortal Entry")
+                                Split(MORT_REGEX, "§2Open"),
+                                Split(BLOOD_OPEN_REGEX, "§bClear"),
+                                Split(Regex("\\[BOSS] The Watcher: You have proven yourself\\. You may pass\\."), "§dPortal")
                             )
                             )
                             add(Split(Regex("^\\s*☠ Defeated (.+) in 0?([\\dhms ]+?)\\s*(\\(NEW RECORD!\\))?$"), "§1Total"))

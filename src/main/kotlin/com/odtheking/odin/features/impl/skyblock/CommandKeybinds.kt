@@ -35,4 +35,12 @@ object CommandKeybinds : Module(
         if (!enabled || !LocationUtils.isInSkyblock) return@onPress
         sendCommand("potionbag")
     }
+    private val sbmenu by KeybindSetting("SB Menu", GLFW.GLFW_KEY_UNKNOWN, desc = "Opens the skyblock menu.").onPress {
+        if (!enabled || !LocationUtils.isInSkyblock) return@onPress
+        sendCommand("sbmenu")
+    }
+    private val trades by KeybindSetting("Trades", GLFW.GLFW_KEY_UNKNOWN, desc = "Opens the trades menu.").onPress {
+        if (!enabled || !LocationUtils.isInSkyblock) return@onPress
+        sendCommand("trades")
+    }
 }
