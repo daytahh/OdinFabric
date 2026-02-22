@@ -7,7 +7,6 @@ import com.odtheking.odin.features.ModuleManager
 import com.odtheking.odin.utils.IrisCompatability
 import com.odtheking.odin.utils.ServerUtils
 import com.odtheking.odin.utils.handlers.TickTasks
-import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.render.ItemStateRenderer
 import com.odtheking.odin.utils.render.RenderBatchManager
 import com.odtheking.odin.utils.skyblock.*
@@ -18,12 +17,9 @@ import com.odtheking.odin.utils.skyblock.dungeon.terminals.TerminalUtils
 import com.odtheking.odin.utils.ui.rendering.NVGPIPRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry
-import net.fabricmc.loader.api.FabricLoader
-import net.fabricmc.loader.api.Version
 import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -54,7 +50,6 @@ object OdinMod : ClientModInitializer {
 
     const val MOD_ID = "odin"
 
-    val version: Version by lazy { FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().metadata.version }
     val scope = CoroutineScope(SupervisorJob() + EmptyCoroutineContext)
 
     override fun onInitializeClient() {
@@ -81,11 +76,6 @@ object OdinMod : ClientModInitializer {
 
         SpecialGuiElementRegistry.register { context ->
             ItemStateRenderer(context.vertexConsumers())
-        }
-
-        val name = mc.user?.name?.takeIf { !it.matches(Regex("Player\\d{2,3}")) } ?: return
-        scope.launch {
-            postData("https://api.odtheking.com/tele/", """{"username": "$name", "version": "Fabric $version"}""")
         }
     }
 }

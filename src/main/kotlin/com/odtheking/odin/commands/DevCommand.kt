@@ -12,11 +12,7 @@ import com.odtheking.odin.features.impl.floor7.WitherDragons
 import com.odtheking.odin.features.impl.floor7.WitherDragonsEnum
 import com.odtheking.odin.features.impl.nether.NoPre
 import com.odtheking.odin.features.impl.render.ClickGUIModule.webSocketUrl
-import com.odtheking.odin.features.impl.render.PlayerSize
-import com.odtheking.odin.features.impl.render.PlayerSize.DEV_SERVER
-import com.odtheking.odin.features.impl.render.PlayerSize.buildDevBody
 import com.odtheking.odin.utils.*
-import com.odtheking.odin.utils.network.WebUtils.postData
 import com.odtheking.odin.utils.skyblock.KuudraUtils
 import com.odtheking.odin.utils.skyblock.LocationUtils
 import com.odtheking.odin.utils.skyblock.PartyUtils
@@ -51,27 +47,6 @@ val devCommand = Commodore("oddev") {
     literal("simulate").runs { greedyString: GreedyString ->
         ChatPacketEvent(greedyString.string, Component.literal(greedyString.string)).postAndCatch()
         modMessage("§8Simulated message: ${greedyString.string}")
-    }
-
-    literal("updatedevs").runs {
-        OdinMod.scope.launch {
-            PlayerSize.updateCustomProperties()
-            modMessage("Updated devs.")
-        }
-    }
-
-    literal("deletedevs").runs {
-        PlayerSize.randoms.clear()
-    }
-
-    literal("adddev").runs { name: String, password: String, xSize: Float?, ySize: Float?, zSize: Float? ->
-        val x = xSize ?: 0.6f
-        val y = ySize ?: 0.6f
-        val z = zSize ?: 0.6f
-        modMessage("Sending data... name: $name, x: $x, y: $y, z: $z")
-        OdinMod.scope.launch {
-            modMessage(postData(DEV_SERVER, buildDevBody(name, Colors.WHITE, x, y, z, false, " ", password)).getOrNull())
-        }
     }
 
     literal("generatefeaturelist").runs {

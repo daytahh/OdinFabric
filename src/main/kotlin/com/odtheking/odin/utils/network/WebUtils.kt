@@ -33,20 +33,6 @@ object WebUtils {
             .map { response -> response.body().byteInputStream() }
             .onFailure { logger.warn("Failed to get input stream from $url: ${it.message}") }
 
-    suspend fun postData(url: String, body: String): Result<String> =
-        executeRequest(
-            HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Accept", "application/json")
-                .header("User-Agent", USER_AGENT)
-                .header("Content-Type", "application/json; charset=utf-8")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .timeout(Duration.ofSeconds(10))
-                .build()
-        )
-            .mapCatching { response -> response.body() }
-            .onFailure { logger.warn("Failed to post data to $url: ${it.message}") }
-
     private fun createGetRequest(url: String): HttpRequest =
         HttpRequest.newBuilder()
             .uri(URI.create(url))
