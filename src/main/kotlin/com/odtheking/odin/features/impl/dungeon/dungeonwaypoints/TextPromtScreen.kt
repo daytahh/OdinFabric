@@ -56,8 +56,6 @@ class TextPromptScreen(val promptTitle: String) : Screen(Component.literal(promp
     }
 
     override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        renderBackground(context, mouseX, mouseY, delta)
-
         val dialogWidth = 300
         val dialogHeight = 140
         val dialogX = (width - dialogWidth) / 2

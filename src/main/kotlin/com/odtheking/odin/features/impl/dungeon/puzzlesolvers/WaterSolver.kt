@@ -63,8 +63,13 @@ object WaterSolver {
 
         val solutionList = solutions
             .flatMap { (lever, times) -> times.drop(lever.i).map { Pair(lever, it) } }
-            .sortedWith(compareBy({ it.second != 0.0 }, { it.first.ordinal }))
-
+            .sortedWith(
+                compareBy(
+                    { it.second != 0.0 },
+                    { if (it.second == 0.0) it.first.ordinal else Int.MAX_VALUE },
+                    { if (it.second != 0.0) it.second else 0.0 }
+                )
+            )
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
             mc.player?.let { event.drawTracer(Vec3(firstSolution.leverPos).add(.5, .5, .5), color = tracerColorFirst, depth = false) }
