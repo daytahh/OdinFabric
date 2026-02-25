@@ -91,6 +91,7 @@ object Etherwarp : Module(
 
         onSend<ServerboundUseItemPacket> {
             if (!LocationUtils.isCurrentArea(Island.SinglePlayer)) return@onSend
+            if (cachedEtherData == null || (mc.player?.isShiftKeyDown == false && cachedEtherData?.itemId != "ETHERWARP_CONDUIT")) return@onSend
 
             etherPos?.pos?.let {
                 if (etherPos?.succeeded == false) return@onSend
